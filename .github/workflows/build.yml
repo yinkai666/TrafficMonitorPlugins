@@ -1,0 +1,35 @@
+name: Build Stock Plugin
+
+on:
+  push:
+    branches: [ clistery, main, master ]
+  pull_request:
+    branches: [ clistery, main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: [Release]
+        platform: [x64, x86]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build
+      run: msbuild TrafficMonitorPlugins.sln /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+
+    - name: Upload Stock Plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: Stock-${{ matrix.platform }}
+        path: |
+          ${{ matrix.platform == 'x64' && 'x64/Release/Stock.dll' || 'Release/Stock.dll' }}
