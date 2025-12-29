@@ -3,6 +3,8 @@ name: Build Stock Plugin
 on:
   push:
     branches: [ clistery, main, master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ clistery, main, master ]
   workflow_dispatch:
@@ -33,3 +35,31 @@ jobs:
         name: Stock-${{ matrix.platform }}
         path: |
           ${{ matrix.platform == 'x64' && 'bin/x64/Release/Stock.dll' || 'bin/Release/Stock.dll' }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Download x64 artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Stock-x64
+        path: Stock-x64
+
+    - name: Download x86 artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Stock-x86
+        path: Stock-x86
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          Stock-x64/Stock.dll
+          Stock-x86/Stock.dll
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
