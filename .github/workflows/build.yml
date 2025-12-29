@@ -54,12 +54,17 @@ jobs:
         name: Stock-x86
         path: Stock-x86
 
+    - name: Rename files
+      run: |
+        mv Stock-x64/Stock.dll Stock-x64.dll
+        mv Stock-x86/Stock.dll Stock-x86.dll
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          Stock-x64/Stock.dll
-          Stock-x86/Stock.dll
+          Stock-x64.dll
+          Stock-x86.dll
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
